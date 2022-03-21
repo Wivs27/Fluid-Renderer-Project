@@ -1,13 +1,13 @@
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
+#include "solver.h"
 
 // Constant variables to set the size of the window
 const unsigned int width = 800;
 const unsigned int height = 800;
 
-int main()
-{
+int main(){
 	// Initialize GLFW
 	glfwInit();
 
@@ -24,8 +24,7 @@ int main()
 	// Create a GLFWwindow object of 800 by 800 pixels
 	GLFWwindow* window = glfwCreateWindow(width, height, "COMP3931 Project", NULL, NULL);
 	// Error check if the window fails to create
-	if (window == NULL)
-	{
+	if (window == NULL){
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
@@ -52,8 +51,7 @@ int main()
 
 
 	// Main while loop
-	while (!glfwWindowShouldClose(window))
-	{
+	while (!glfwWindowShouldClose(window)){
 		// Take care of all GLFW events
 		glfwPollEvents();
 	}
