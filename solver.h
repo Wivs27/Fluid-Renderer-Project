@@ -1,11 +1,25 @@
 #pragma once
 
-void set_bnd(int N, int b, float* x);
-void diffuse(int N, int b, float* x, float* x0, float diff, float dt);
-void advect(int N, int b, float* d, float* d0, float* u, float* v, float dt);
-void add_source(int N, float* x, float* s, float dt);
-void project(int N, float* u, float* v, float* p, float* div);
-void dens_step(int N, float* x, float* x0, float* u, float* v, float diff, float dt);
-void vel_step(int N, float* u, float* v, float* u0, float* v0, float visc, float dt);
-void lin_solve(int N, int b, float* x, float* x0, float a, float c);
+struct FluidCube {
+    int size;
+    float dt;
+    float diff;
+    float visc;
 
+    float* s;
+    float* density;
+
+    float* Vx;
+    float* Vy;
+    float* Vz;
+
+    float* Vx0;
+    float* Vy0;
+    float* Vz0;
+}; typedef struct FluidCube FluidCube;
+
+FluidCube* FluidCubeCreate(int size, float diffusion, float viscosity, float dt);
+void FluidCubeFree(FluidCube* cube);
+void FluidCubeStep(FluidCube* cube);
+void FluidCubeAddDensity(FluidCube* cube, int x, int y, int z, float amount);
+void FluidCubeAddVelocity(FluidCube* cube, int x, int y, int z, float amountX, float amountY, float amountZ);
