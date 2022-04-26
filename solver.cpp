@@ -2,12 +2,11 @@
 #include<iostream>
 #include <stdlib.h>
 
-#define IX(x, y, z) ((x) + (y) * N + (z) * N * N)
+#define IX(i,j,k) ((i)+(M+2)*(j) + (M+2)*(N+2)*(k)) 
+static int M = 42;
+// code obtained from https://mikeash.com/pyblog/fluid-simulation-for-dummies.html
 
-/* code obtained from https://mikeash.com/pyblog/fluid-simulation-for-dummies.html
-*  accessed 25/04/22
-*/
-
+//structure that contains everything needed for the simulation
 struct FluidCube {
     int size;
     float dt;
@@ -27,31 +26,33 @@ struct FluidCube {
 }; typedef struct FluidCube FluidCube;
 
 
-
+//function to allocate all the memory required for the sim using calloc to initialise 
+//the arrays to 0 instead of junk memory
 FluidCube* FluidCubeCreate(int size, float diffusion, float viscosity, float dt)
 {
     FluidCube* cube = (FluidCube*)malloc(sizeof(*cube));
-    int N = size;
+    int N = (size + 2) * (size + 2) * (size + 2);
 
     cube->size = size;
     cube->dt = dt;
     cube->diff = diffusion;
     cube->visc = viscosity;
 
-    cube->s = (float*)calloc(N * N * N, sizeof(float));
-    cube->density = (float*)calloc(N * N * N, sizeof(float));
+    cube->s = (float*)calloc(N, sizeof(float));
+    cube->density = (float*)calloc(N, sizeof(float));
 
-    cube->Vx = (float*)calloc(N * N * N, sizeof(float));
-    cube->Vy = (float*)calloc(N * N * N, sizeof(float));
-    cube->Vz = (float*)calloc(N * N * N, sizeof(float));
+    cube->Vx = (float*)calloc(N, sizeof(float));
+    cube->Vy = (float*)calloc(N, sizeof(float));
+    cube->Vz = (float*)calloc(N, sizeof(float));
 
-    cube->Vx0 = (float*)calloc(N * N * N, sizeof(float));
-    cube->Vy0 = (float*)calloc(N * N * N, sizeof(float));
-    cube->Vz0 = (float*)calloc(N * N * N, sizeof(float));
+    cube->Vx0 = (float*)calloc(N, sizeof(float));
+    cube->Vy0 = (float*)calloc(N, sizeof(float));
+    cube->Vz0 = (float*)calloc(N, sizeof(float));
 
     return cube;
 }
 
+//frees all the memory used
 void FluidCubeFree(FluidCube* cube)
 {
     free(cube->s);
@@ -68,7 +69,9 @@ void FluidCubeFree(FluidCube* cube)
     free(cube);
 }
 
-
+//set bounds method as the simulation takes place in an enclosed box
+//so no fluid should be able to escape the bounds
+//this function implements those rules
 static void set_bnd(int b, float* x, int N)
 {
     for (int j = 1; j < N - 1; j++) {
@@ -116,6 +119,8 @@ static void set_bnd(int b, float* x, int N)
         + x[IX(N - 1, N - 1, N - 2)]);
 }
 
+//as the simulation requires alot of linear equations to be solved this function uses
+//the gauss-seidel itterative method to solve them
 static void lin_solve(int b, float* x, float* x0, float a, float c, int iter, int N)
 {
     float cRecip = 1.0 / c;
@@ -251,6 +256,7 @@ static void project(float* velocX, float* velocY, float* velocZ, float* p, float
     set_bnd(3, velocZ, N);
 }
 
+//function to step through the simulation
 void FluidCubeStep(FluidCube* cube)
 {
     int N = cube->size;
@@ -280,20 +286,4 @@ void FluidCubeStep(FluidCube* cube)
 
     diffuse(0, s, density, diff, dt, 4, N);
     advect(0, density, s, Vx, Vy, Vz, dt, N);
-}
-
-void FluidCubeAddDensity(FluidCube* cube, int x, int y, int z, float amount)
-{
-    int N = cube->size;
-    cube->density[IX(x, y, z)] += amount;
-}
-
-void FluidCubeAddVelocity(FluidCube* cube, int x, int y, int z, float amountX, float amountY, float amountZ)
-{
-    int N = cube->size;
-    int index = IX(x, y, z);
-
-    cube->Vx[index] += amountX;
-    cube->Vy[index] += amountY;
-    cube->Vz[index] += amountZ;
 }

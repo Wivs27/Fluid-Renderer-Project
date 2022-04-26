@@ -21,5 +21,4 @@ struct FluidCube {
 FluidCube* FluidCubeCreate(int size, float diffusion, float viscosity, float dt);
 void FluidCubeFree(FluidCube* cube);
 void FluidCubeStep(FluidCube* cube);
-void FluidCubeAddDensity(FluidCube* cube, int x, int y, int z, float amount);
-void FluidCubeAddVelocity(FluidCube* cube, int x, int y, int z, float amountX, float amountY, float amountZ);
+
